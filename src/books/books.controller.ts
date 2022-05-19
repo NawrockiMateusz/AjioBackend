@@ -24,13 +24,19 @@ export class BooksController {
   constructor(private booksService: BooksService) {}
 
   @Get()
-  getBooks(@Query() filterDto: GetBooksFilterDto): Promise<Book[]> {
-    return this.booksService.getBooks(filterDto);
+  getBooks(
+    @Query() filterDto: GetBooksFilterDto,
+    @GetUser() user: User,
+  ): Promise<Book[]> {
+    return this.booksService.getBooks(filterDto, user);
   }
 
   @Get('/:id')
-  async getBookById(@Param('id') id: string): Promise<Book> {
-    return this.booksService.getBookById(id);
+  async getBookById(
+    @Param('id') id: string,
+    @GetUser() user: User,
+  ): Promise<Book> {
+    return this.booksService.getBookById(id, user);
   }
 
   @Post()
@@ -42,16 +48,17 @@ export class BooksController {
   }
 
   @Delete('/:id')
-  deleteBook(@Param('id') id: string): Promise<void> {
-    return this.booksService.deleteBook(id);
+  deleteBook(@Param('id') id: string, @GetUser() user: User): Promise<void> {
+    return this.booksService.deleteBook(id, user);
   }
 
   @Patch('/:id/status')
   updateBookCondition(
     @Param('id') id: string,
     @Body() updateBookConditionDto: UpdateBookConditionDto,
+    @GetUser() user: User,
   ): Promise<Book> {
     const { condition } = updateBookConditionDto;
-    return this.booksService.updateBookCondition(id, condition);
+    return this.booksService.updateBookCondition(id, condition, user);
   }
 }

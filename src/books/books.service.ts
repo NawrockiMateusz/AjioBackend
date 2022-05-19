@@ -13,12 +13,12 @@ export class BooksService {
     @InjectRepository(BooksRepository) private booksRepository: BooksRepository,
   ) {}
 
-  getBooks(filterDto: GetBooksFilterDto): Promise<Book[]> {
-    return this.booksRepository.getBooks(filterDto);
+  getBooks(filterDto: GetBooksFilterDto, user: User): Promise<Book[]> {
+    return this.booksRepository.getBooks(filterDto, user);
   }
 
-  async getBookById(id: string): Promise<Book> {
-    const found = await this.booksRepository.findOne(id);
+  async getBookById(id: string, user: User): Promise<Book> {
+    const found = await this.booksRepository.findOne({ where: { id, user } });
 
     if (!found) {
       throw new NotFoundException(`Task with ID "${id}" not found`);
@@ -31,8 +31,8 @@ export class BooksService {
     return this.booksRepository.addBook(addBookDto, user);
   }
 
-  async deleteBook(id: string): Promise<void> {
-    const result = await this.booksRepository.delete(id);
+  async deleteBook(id: string, user: User): Promise<void> {
+    const result = await this.booksRepository.delete({ id, user });
 
     if (result.affected === 0) {
       throw new NotFoundException(`Taks with ID "${id}" not found`);
@@ -42,8 +42,9 @@ export class BooksService {
   async updateBookCondition(
     id: string,
     condition: BookCondition,
+    user: User,
   ): Promise<Book> {
-    const book = await this.getBookById(id);
+    const book = await this.getBookById(id, user);
 
     book.condition = condition;
     await this.booksRepository.save(book);

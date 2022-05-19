@@ -7,9 +7,11 @@ import { GetBooksFilterDto } from './dto/get-books-filter.dto';
 
 @EntityRepository(Book)
 export class BooksRepository extends Repository<Book> {
-  async getBooks(filterDto: GetBooksFilterDto): Promise<Book[]> {
+  async getBooks(filterDto: GetBooksFilterDto, user: User): Promise<Book[]> {
     const { condition, search } = filterDto;
+
     const query = this.createQueryBuilder('book');
+    query.where({ user });
 
     if (condition) {
       query.andWhere('book.condition = :condition', { condition });
@@ -17,7 +19,7 @@ export class BooksRepository extends Repository<Book> {
 
     if (search) {
       query.andWhere(
-        'LOWER(book.title) LIKE LOWER(:search) OR LOWER(book.author) LIKE LOWER(:search)',
+        '(LOWER(book.title) LIKE LOWER(:search) OR LOWER(book.author) LIKE LOWER(:search))',
         { search: `%${search}%` },
       );
     }
